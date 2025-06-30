@@ -1,0 +1,13 @@
+[project]
+name = "mcp-clickhouse"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "clickhouse-connect>=0.8.18",
+    "fastmcp>=2.9.2",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "urllib3>=2.5.0",
+]
