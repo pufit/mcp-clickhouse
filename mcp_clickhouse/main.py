@@ -1,12 +1,13 @@
 import logging
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Any, Literal
+from typing import AsyncGenerator, Any
 
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 
 from mcp_clickhouse.config import mcp_config
-from mcp_clickhouse.db_utils import clickhouse_default, db_fetchall, db_fetchone, http_client
+from mcp_clickhouse.db_utils import clickhouse_default, db_fetchall
+from mcp_clickhouse import db_utils
 from mcp_clickhouse.structures import Database, Table, Column
 
 logger = logging.getLogger("mcp-clickhouse")
@@ -129,13 +130,13 @@ async def list_tables(
 
 
 @mcp.tool
-async def execute_query(query: str, timeout: float = 30.) -> dict[str, Any]:
+async def execute_query(query: str, max_execution_time: float = 30.) -> dict[str, Any]:
     """
     Execute a ClickHouse query.
 
     Parameters:
         query: SQL query to execute.
-        timeout: Maximum time to wait for query execution.
+        max_execution_time: Maximum time to wait for query execution.
 
     Returns:
         A dictionary with column names and row data.
@@ -143,10 +144,10 @@ async def execute_query(query: str, timeout: float = 30.) -> dict[str, Any]:
     Raises:
         ToolError: If query execution fails.
     """
-    assert http_client
+    assert db_utils.http_client
 
     try:
-        res = await http_client.query(query, settings={"timeout": timeout})
+        res = await db_utils.http_client.query(query, settings={"max_execution_time": max_execution_time})
         logger.info("Query returned %s rows", len(res.result_rows))
         return {"columns": res.column_names, "rows": res.result_rows}
     except Exception as err:
